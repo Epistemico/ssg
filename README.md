@@ -1,2 +1,3 @@
-# ssg
-Simple Static Site Generator
+# Static Site Generator
+
+A simple Static Site Generator
