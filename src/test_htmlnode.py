@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -97,6 +97,80 @@ class TestLeafNode(unittest.TestCase):
     def test_repr(self):
         node = LeafNode("b", "Bold")
         self.assertEqual(node.__repr__(), "LeafNode(b, Bold, None)")
+
+
+class TestParentNode(unittest.TestCase):
+    def test_values(self):
+        node = ParentNode(
+            "div",
+            [
+                LeafNode("b", "Bold Text"),
+                ParentNode("p", [LeafNode("strong", "Emphasis")]),
+            ],
+            {"display": "flex"},
+        )
+        self.assertEqual(node.tag, "div")
+        self.assertIsInstance(node.children[0], LeafNode)
+        self.assertIsInstance(node.children[1], ParentNode)
+        self.assertEqual(node.props, {"display": "flex"})
+
+    def test_repr(self):
+        node = ParentNode("p", [LeafNode("b", "bold")])
+        self.assertEqual(repr(node), "ParentNode(p, children: [LeafNode(b, bold, None)], None)")
+
+    def test_to_html_value(self):
+        node = ParentNode(None, [LeafNode("b", "boldy")])
+        try:
+            node.to_html()
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
+
+    def test_to_html_no_children(self):
+        node = ParentNode("p", [])
+        node2 = ParentNode("div", None)
+        try:
+            node.to_html()
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
+        try:
+            node2.to_html()
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
+
+    def test_to_html_children(self):
+        node = ParentNode(
+            "p",
+            [
+                LeafNode("b", "Bold text"),
+                LeafNode(None, "Normal text"),
+                LeafNode("i", "italic text"),
+                LeafNode(None, "Normal text"),
+            ],
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>"
+        )
+
+    def test_to_html_parent_in_children(self):
+        node = ParentNode(
+            "div",
+            [
+                ParentNode("p",
+                           [
+                               LeafNode(None, "Hello, "), 
+                               LeafNode("b", "world!"),
+                               LeafNode("a", "Click here!", {"href": "https://www.boot.dev"})
+                            ]
+                ),
+                LeafNode(None, "Link to image"),
+                LeafNode("a", "of a cat.", {"href": "img/cat.jpg"}),
+            ]
+        )
+        self.assertEqual(
+            node.to_html(),
+            '<div><p>Hello, <b>world!</b><a href="https://www.boot.dev">Click here!</a></p>Link to image<a href="img/cat.jpg">of a cat.</a></div>'
+        )
 
 
 if __name__ == "__main__":
