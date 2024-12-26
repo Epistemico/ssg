@@ -15,4 +15,5 @@ def main():
     parent = ParentNode("p", [LeafNode("b", "Bold text"), LeafNode(None, "Normal text")])
     print(parent)
 
+
 main()
