@@ -1,9 +1,13 @@
 import unittest
-from inline_md import split_nodes_delimiter
+from inline_md import (
+    split_nodes_delimiter, 
+    extract_markdown_images, 
+    extract_markdown_links
+)
 from textnode import TextType, TextNode
 
 
-class TestInlineMD(unittest.TestCase):
+class TestTextNodeDelimiter(unittest.TestCase):
     def test_textnode(self):
         node = TextNode("This is text with a `code block` word", TextType.TEXT)
         new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
@@ -109,6 +113,29 @@ class TestInlineMD(unittest.TestCase):
                 TextNode(" word", TextType.TEXT),
             ],
             new_nodes,
+        )
+
+
+class TestExtractImagesLinks(unittest.TestCase):
+    def test_extract_img(self):
+        img_md = "Text with an image ![cat](img/cat.jpg) and ![dog](img/dog.jpg)"
+        self.assertEqual(
+            extract_markdown_images(img_md),
+            [
+                ("cat", "img/cat.jpg"),
+                ("dog", "img/dog.jpg"),
+            ],
+        )
+
+
+    def test_extract_link(self):
+        link_md = "Here's a [link in markdown](https://www.google.com) and [to BootDev](https://www.boot.dev)"
+        self.assertEqual(
+            extract_markdown_links(link_md),
+            [
+                ("link in markdown", "https://www.google.com"),
+                ("to BootDev", "https://www.boot.dev"),
+            ],
         )
 
 
